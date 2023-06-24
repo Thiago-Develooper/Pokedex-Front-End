@@ -1,6 +1,6 @@
 // Função para obter os dados dos primeiros 9 Pokémon
 function getFirstNinePokemons() {
-  const apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=9';
+  const apiUrl = 'https://pokeapi.co/api/v2/pokemon?limit=150';
 
   fetch(apiUrl)
     .then(response => response.json())
@@ -161,10 +161,61 @@ function getSinglePokemonData() {
 }
 
 // Função para obter a cadeia de evolução do Pokémon
-function getEvolutionChain(pokemonId) {
-  const apiUrl = `https://pokeapi.co/api/v2/evolution-chain/${pokemonId}/`;
+// Função para exibir a cadeia de evolução na página
+function displayEvolutionChain(evolutionChain) {
+  const evolucoesContainer = document.querySelector('.evolucoes');
+  evolucoesContainer.innerHTML = '';
 
+  const evolucoesHeading = document.createElement('h3');
+  evolucoesHeading.textContent = 'Evoluções';
+  evolucoesContainer.appendChild(evolucoesHeading);
+
+  const evolucoesList = document.createElement('div');
+  evolucoesList.classList.add('list-e', 'd-flex', 'justify-content-evenly', 'mt-3');
+
+  evolucoesContainer.appendChild(evolucoesList);
+
+  evolutionChain.forEach(evolution => {
+    const evolutionCard = createEvolutionCard(evolution);
+    evolucoesList.appendChild(evolutionCard);
+  });
+}
+
+// Função para criar o elemento HTML do card de evolução
+function createEvolutionCard(evolution) {
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const image = document.createElement('img');
+  image.className = 'card-img-top';
+  image.src = evolution.image;
+  image.alt = 'Pokemon Evolution';
+
+  const cardBody = document.createElement('div');
+  cardBody.className = 'card-body';
+
+  const title = document.createElement('h5');
+  title.className = 'card-title';
+  title.textContent = evolution.name;
+
+  cardBody.appendChild(title);
+
+  card.appendChild(image);
+  card.appendChild(cardBody);
+
+  return card;
+}
+
+// Função para obter a cadeia de evolução do Pokémon
+function getEvolutionChain(pokemonId) {
+  const apiUrl = `https://pokeapi.co/api/v2/pokemon-species/${pokemonId}/`;
+  
   fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      const evolutionChainUrl = data.evolution_chain.url;
+      return fetch(evolutionChainUrl);
+    })
     .then(response => response.json())
     .then(data => {
       const evolutionChain = parseEvolutionChain(data);
@@ -174,6 +225,7 @@ function getEvolutionChain(pokemonId) {
       console.log('Ocorreu um erro ao obter a cadeia de evolução do Pokémon:', error);
     });
 }
+
 
 // Função para analisar a cadeia de evolução e obter os nomes e imagens das evoluções
 function parseEvolutionChain(data) {
@@ -191,7 +243,7 @@ function parseEvolutionData(data, evolutionChain) {
   const speciesUrl = data.species.url;
 
   const speciesId = getPokemonIdFromURL(speciesUrl);
-  const speciesImage = `https://pokeapi.co/media/sprites/pokemon/${speciesId}.png`;
+  const speciesImage = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${speciesId}.png`;
 
   evolutionChain.push({
     name: speciesName,
@@ -204,36 +256,15 @@ function parseEvolutionData(data, evolutionChain) {
   }
 }
 
-// Função auxiliar para obter o ID do Pokémon a partir da URL
 function getPokemonIdFromURL(url) {
   const urlParts = url.split('/');
   return urlParts[urlParts.length - 2];
 }
 
-// Função para exibir a cadeia de evolução na página
-// Função para exibir a cadeia de evolução na página
-function displayEvolutionChain(evolutionChain) {
-  const evolucoesContainer = document.querySelector('.evolucoes');
-  evolucoesContainer.innerHTML = '';
+// Resto do código...
 
-  const evolucoesHeading = document.createElement('h3');
-  evolucoesHeading.textContent = 'Evoluções';
-  evolucoesContainer.appendChild(evolucoesHeading);
 
-  const evolucoesList = document.createElement('div');
-  evolucoesList.classList.add('list-e', 'd-flex',"justify-content-evenly","mt-3");
-
-  evolucoesContainer.appendChild(evolucoesList);
-
-  evolutionChain.forEach(evolution => {
-    const evolutionName = document.createElement('h5');
-    evolutionName.textContent = evolution.name;
-    evolutionName.classList.add('flex-row');
-
-    evolucoesList.appendChild(evolutionName);
-  });
-}
-
+// Exibir as habilidades de ataque e defesa do Pokémon na seção "Movimentos"
 // Chamada da função para obter os dados do Pokémon selecionado
 getSinglePokemonData();
 
@@ -241,3 +272,4 @@ getSinglePokemonData();
 getFirstNinePokemons();
 
 // Exibir as habilidades de ataque e defesa do Pokémon na seção "Movimentos"
+
